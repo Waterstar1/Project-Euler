@@ -1,0 +1,114 @@
+import java.util.*;
+
+class Main {
+  public static void main(String[] args) {
+    // String board = "Grid 01 003020600 900305001 001806400 008102900 700000008 006708200 002609500 800203009 005010300";
+
+    String board = "Grid 50 300200000 000107000 706030500 070009080 900020004 010800050 009040301 000702000 000008006";
+
+    Puzzle puzzle1 = new Puzzle(board);
+    puzzle1.print_board();
+    puzzle1.solve();
+  }
+}
+
+
+class Puzzle {
+
+  private String[][] board = new String[9][9];
+
+  public Puzzle(String pre_board) {
+    List<String> split_board = splice(pre_board); 
+    for(int i = 0; i < split_board.size(); i++) {
+      String row = split_board.get(i);
+      for(int j = 0; j < row.length(); j++) {
+        this.board[i][j] = row.substring(j, j + 1);
+      }
+    }
+  }
+
+  private List<String> splice(String pre_board) { 
+    List<String> split_board = Arrays.asList(pre_board.split(" ", 100));
+    return split_board.subList(2, split_board.size());
+  }
+
+  public void print_board() {
+    for(int i = 0; i < this.board.length; i++) {
+      for(int j = 0; j < this.board[0].length; j++) {
+        System.out.print(this.board[i][j] + " ");
+      }
+      System.out.println();
+    }
+    System.out.println();
+  }
+
+  public boolean check_row(int row, String num) {
+    for(int j = 0; j < 9; j++) {
+      if((this.board[row][j]).equals(num)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public boolean check_column(int col, String num) {
+    for(int i = 0; i < 9; i++) {
+      if((this.board[i][col]).equals(num)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public boolean check_square(int row, int col, String num) {
+    int row_start = row - (row % 3);
+    int col_start = col - (col % 3);
+    for(int i = row_start; i < row_start + 3; i++) {
+      for(int j = col_start; j < col_start + 3; j++) {
+        if((this.board[i][j]).equals(num)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  public boolean check_all(int row, int col, String num) {
+    return (check_column(col, num) && check_row(row, num) && check_square(row, col, num));
+  }
+
+  public void solve() {
+    boolean check = false;
+    int row = 0;
+    int col = 0;
+
+    outerloop:
+    for(int i = 0; i < 9 ; i++){
+      for(int j = 0; j < 9; j++){
+        if(this.board[i][j].equals("0")){
+          row = i;
+          col = j;
+          check = true;
+          break outerloop;
+        }
+      }
+    }
+
+    if(check) {
+      for(int num = 1; num < 11; num++) {
+        if(num == 10) {
+          this.board[row][col] = "0";
+          break;
+        }
+        String new_num = Integer.toString(num);
+        if(check_all(row, col, new_num)) {
+          this.board[row][col] = new_num;
+          solve();
+        } 
+      }
+    }
+    else {
+      print_board();
+    }
+  }
+}
